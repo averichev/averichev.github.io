@@ -1,0 +1,7 @@
+title: averichev
+markdown: kramdown
+theme: minima
+collections:
+  articles:
+    output: true
+    permalink: /:title/
