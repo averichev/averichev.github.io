@@ -1,7 +1,13 @@
 title: averichev
 markdown: kramdown
 theme: minima
+slugify_mode: latin
 collections:
   articles:
     output: true
-    permalink: /:title/
+defaults:
+  - scope:
+      path: ""
+      type: articles
+    values:
+      layout: post

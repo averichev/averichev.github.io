@@ -1,7 +1,8 @@
 ---
-layout: post
-title: "Rust vs C#"
-permalink: /await-errors-handling/
+title: "Ключевое слово await и обработка ошибок в асинхронных методах"
+permalink: /articles/await-error-handling/
 ---
 
 # Асинхронность в .NET ― ключевое слово await и обработка ошибок в асинхронных методах
+
+Содержимое статьи появится здесь.
