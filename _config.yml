@@ -1,10 +1,10 @@
 title: averichev
 markdown: kramdown
 theme: minima
+slugify_mode: latin
 collections:
   articles:
     output: true
-    permalink: /articles/:name/
 defaults:
   - scope:
       path: ""
