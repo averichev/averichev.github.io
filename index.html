@@ -47,16 +47,16 @@
     <p>В контексте программирования синхронность — это зависимость выполнения по времени операторов (процедур).</p>
     <p>Операторы выполняются строго по очереди один за другим: время начала выполнения оператора зависит от времени
         окончания предыдущего.</p>
-    <p>Cинхронное выполнение операций в программировании логично и интуитивно понятно человеку.
+    <p>Синхронное выполнение операций в программировании логично и интуитивно понятно человеку.
         Оно отражает привычную модель мышления: линейный, причинно временной ход событий.</p>
 
     <code>
-            <pre>
-        var a = 2;
-        var b = 40;
-        var c = a + b;
-        Console.WriteLine("Ответ на ваш вопрос: " + c);
-                 </pre>
+        <pre>
+            var a = 2;
+            var b = 40;
+            var c = a + b;
+            Console.WriteLine("Ответ на ваш вопрос: " + c);
+        </pre>
     </code>
 
 
@@ -66,40 +66,40 @@
     </p>
 
     <code>
-            <pre>
-        Console.WriteLine("Прочтем великое произведение...");
-        var content = File.ReadAllText("Толстой Л. Н. - Война и мир.txt");
-        Console.WriteLine("Это заняло некоторое время.");
-                </pre>
+        <pre>
+            Console.WriteLine("Прочтем великое произведение...");
+            var content = File.ReadAllText("Толстой Л. Н. - Война и мир.txt");
+            Console.WriteLine("Это заняло некоторое время.");
+        </pre>
     </code>
     <p>Что если наше приложение выполняет настолько полезную работу, что часто обращается к внешним источникам?</p>
 
     <code>
         <pre>
-        Console.WriteLine("Укажите путь к произведению");
-        var path = Console.ReadLine();
-        Console.WriteLine("Читаю файл с диска...");
-        var content = File.ReadAllText(path);
-        Console.WriteLine("Закончил читать файл");
-        Console.WriteLine("Узнаю какое слово встречается чаще всего...");
-        var word = GetMostCommonWord(content);
-        Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
-        return;
+            Console.WriteLine("Укажите путь к произведению");
+            var path = Console.ReadLine();
+            Console.WriteLine("Читаю файл с диска...");
+            var content = File.ReadAllText(path);
+            Console.WriteLine("Закончил читать файл");
+            Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+            var word = GetMostCommonWord(content);
+            Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
+            return;
 
-        string GetMostCommonWord(string content)
-        {
-            var result = string.Empty;
-            // result = ... считаем слова в content
-            return result;
-        }
+            string GetMostCommonWord(string content)
+            {
+                var result = string.Empty;
+                // result = ... считаем слова в content
+                return result;
+            }
             </pre>
     </code>
 
 
-    <p>Получается так что при множестве одновременных запросов, наше приложение не сможет обслужить запросы многих
+    <p>Получается так, что при множестве одновременных запросов, наше приложение не сможет обслужить запросы многих
         пользователей и будет выдавать ошибку (503 — Сервис временно недоступен).</p>
 
-    <p>Тут нам и поможет модель асинхронного программирования.</p>
+    <p>Тут нам и поможет модель асинхронного программирования на основе задач.</p>
 
     <h2>Асинхронное программирование</h2>
 
@@ -118,10 +118,10 @@
     <p>Заменим наш вызов чтения файла на его асинхронную версию:</p>
     <code>
         <pre>
-        /// ...
-        var content = await File.ReadAllTextAsync(path);
-        /// ...
-            </pre>
+            /// ...
+            var content = await File.ReadAllTextAsync(path);
+            /// ...
+        </pre>
     </code>
 
     <p>Обратите внимание, что по соглашению принятому Microsoft - асинхронные методы имеют в названии суффикс
@@ -129,8 +129,40 @@
 
     <p>Теперь процессор может выполнять другу работу пока идет операции чтения с диска.</p>
 
-    <p>Таким образом увеличивается количество одновременных запросов которые может обработать наше приложение.</p>
+    <p>Таким образом увеличивается количество одновременных запросов, которые может обработать наше приложение.</p>
 
+    <p>В языке C# существует ограничение — ключевое слово await может использоваться только в методах, помеченных
+        модификатором <b>async</b>.</p>
+
+    <p>Чтобы продемонстрировать это — сделаем небольшой рефакторинг — выделим основной код нашего приложения в отдельный
+        асинхронный метод и вызовем его.</p>
+
+    <code>
+        <pre>
+            await ReadAndCountWordAsync();
+
+            return;
+
+            async Task ReadAndCountWordAsync()
+            {
+                Console.WriteLine("Укажите путь к произведению");
+                var path = Console.ReadLine();
+                Console.WriteLine("Читаю файл с диска...");
+                var content = await File.ReadAllTextAsync(path);
+                Console.WriteLine("Закончил читать файл");
+                Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+                var word = GetMostCommonWord(content);
+                Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
+            }
+
+            string GetMostCommonWord(string content)
+            {
+                var result = string.Empty;
+                // result = ... считаем слова в content
+                return result;
+            }
+        </pre>
+    </code>
 </div>
 </body>
 </html>
