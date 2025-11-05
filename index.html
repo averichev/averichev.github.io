@@ -219,11 +219,11 @@ public class UsersController(AppDb db) : ControllerBase
     public async Task<IActionResult> GetUser(Guid id, CancellationToken ct)
     {
         var user = await db.Users
-.AsNoTracking()
-.SingleOrDefaultAsync(
-    u => u.Id == id,
-    ct // передаем CancellationToken в EntityFramework
-);
+        .AsNoTracking()
+        .SingleOrDefaultAsync(
+            u => u.Id == id,
+            ct // передаем CancellationToken в EntityFramework
+        );
 
         if (user is null) return NotFound();
         return Ok(user);
