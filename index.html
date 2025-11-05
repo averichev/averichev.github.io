@@ -7,7 +7,7 @@
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body>
-<div class="container py-4 my-4">
+<div class="container-fluid py-4 my-4">
     <h1>Асинхронность в .NET ― ключевое слово await и обработка ошибок в асинхронных методах</h1>
     <p>Для того чтобы понять, как работает асинхронность в контексте платформы .NET, разберемся, что такое <i>синхронность</i>
         и <i>асинхронность</i> в общем смысле.</p>
@@ -29,7 +29,7 @@
     <ul>
         <li>Синхронное плавание: движения спортсменок зависимы по времени — они происходят в одно и то же время.</li>
         <li>Движение планет в солнечной системе: в каждый конкретный момент времени планеты находятся в определенном
-            положении относительно солнца
+положении относительно солнца
         </li>
         <li>Светофор: сигналы включаются в определенном порядке и горят заданное время.</li>
     </ul>
@@ -52,10 +52,10 @@
 
     <code>
         <pre>
-            var a = 2;
-            var b = 40;
-            var c = a + b;
-            Console.WriteLine("Ответ на ваш вопрос: " + c);
+var a = 2;
+var b = 40;
+var c = a + b;
+Console.WriteLine("Ответ на ваш вопрос: " + c);
         </pre>
     </code>
 
@@ -67,32 +67,32 @@
 
     <code>
         <pre>
-            Console.WriteLine("Прочтем великое произведение...");
-            var content = File.ReadAllText("Толстой Л. Н. - Война и мир.txt");
-            Console.WriteLine("Это заняло некоторое время.");
+Console.WriteLine("Прочтем великое произведение...");
+var content = File.ReadAllText("Толстой Л. Н. - Война и мир.txt");
+Console.WriteLine("Это заняло некоторое время.");
         </pre>
     </code>
     <p>Что если наше приложение выполняет настолько полезную работу, что часто обращается к внешним источникам?</p>
 
     <code>
         <pre>
-            Console.WriteLine("Укажите путь к произведению");
-            var path = Console.ReadLine();
-            Console.WriteLine("Читаю файл с диска...");
-            var content = File.ReadAllText(path);
-            Console.WriteLine("Закончил читать файл");
-            Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
-            var word = GetMostCommonWord(content);
-            Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
-            return;
+Console.WriteLine("Укажите путь к произведению");
+var path = Console.ReadLine();
+Console.WriteLine("Читаю файл с диска...");
+var content = File.ReadAllText(path);
+Console.WriteLine("Закончил читать файл");
+Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+var word = GetMostCommonWord(content);
+Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
+return;
 
-            string GetMostCommonWord(string content)
-            {
-                var result = string.Empty;
-                // result = ... считаем слова в content
-                return result;
-            }
-            </pre>
+string GetMostCommonWord(string content)
+{
+    var result = string.Empty;
+    // result = ... считаем слова в content
+    return result;
+}
+</pre>
     </code>
 
 
@@ -118,9 +118,9 @@
     <p>Заменим наш вызов чтения файла на его асинхронную версию:</p>
     <code>
         <pre>
-            /// ...
-            var content = await File.ReadAllTextAsync(path);
-            /// ...
+/// ...
+var content = await File.ReadAllTextAsync(path);
+/// ...
         </pre>
     </code>
 
@@ -139,55 +139,133 @@
 
     <code>
         <pre>
-            Console.WriteLine("Укажите путь к произведению");
-            var path = Console.ReadLine();
-            await ReadAndCountWordAsync(path);
+Console.WriteLine("Укажите путь к произведению");
+var path = Console.ReadLine();
+await ReadAndCountWordAsync(path);
 
-            return;
+return;
 
-            async Task ReadAndCountWordAsync(string path_to_file)
-            {
-                Console.WriteLine("Читаю файл с диска...");
-                var content = await File.ReadAllTextAsync(path_to_file);
-                Console.WriteLine("Закончил читать файл");
-                Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
-                var word = GetMostCommonWord(content);
-                Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
-            }
+async Task ReadAndCountWordAsync(string path_to_file)
+{
+    Console.WriteLine("Читаю файл с диска...");
+    var content = await File.ReadAllTextAsync(path_to_file);
+    Console.WriteLine("Закончил читать файл");
+    Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+    var word = GetMostCommonWord(content);
+    Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
+}
         </pre>
     </code>
+    <h3>Отмена асинхронных операций</h3>
+    <p>Иногда необходимо прерывать (отменять) асинхронную операцию по причине ненужности операции. Например,
+        пользователь
+        закрыл окно, отменился веб-запрос.</p>
+    <p>В таких случаях необходимо корректно остановить выполнение "дорогой" операции ради экономии ресурсов. Для этого в
+        .NET существует механизм <strong>CancellationToken</strong>.</p>
+    <p>Фактически каждый асинхронный метод, реализованный на платформе .NET имеет параметр для отмены операции.</p>
+    <p>Нам как разработчикам на C# необходимо пробрасывать CancellationToken в методы, написанные нами и передавать
+        далее в методы сторонних библиотек.</p>
+    <p>Ниже показан пример отмены операции для консольного приложения.</p>
+    <code>
+        <pre>
+var token =  GetCancellationToken(); // получаем токен отмены операции
+Console.WriteLine("Укажите путь к произведению");
+var path = Console.ReadLine();
+await ReadAndCountWordAsync(path, token);
+
+return;
+
+async Task ReadAndCountWordAsync(string path_to_file, CancellationToken cancellationToken) // пробрасываем токен в наш метод
+{
+    Console.WriteLine("Читаю файл с диска...");
+    var content = await File.ReadAllTextAsync(path_to_file, cancellationToken); // пробрасываем токен в метод .NET
+    Console.WriteLine("Закончил читать файл");
+    Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+    var word = GetMostCommonWord(content);
+    Console.WriteLine("Чаще всего встречается слово \"" + word + "\"");
+}
+
+static CancellationToken GetCancellationToken() // Создаем токен отмены
+{
+    var cts = new CancellationTokenSource();
+
+    Console.CancelKeyPress += (s, e) =>
+    {
+        e.Cancel = true;
+        Console.WriteLine("Ctrl+C → отмена");
+        cts.Cancel();
+    };
+
+    AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+    {
+        Console.WriteLine("ProcessExit → отмена");
+        cts.Cancel();
+    };
+    return cts.Token;
+}
+        </pre>
+    </code>
+    <p>Как отменяются операции на вебе? В каждый контроллер платформа .NET внедряет CancellationToken на основании
+        жизненного цикла http-запроса. Нам остается только указать его в качестве параметра метода и пробросить ниже по
+        стеку вызова, вплоть до методов реализующих вызовы к базе данных, чтению файлов, обращению к внешним
+        интернет-сервисам и т.п.</p>
+    <code>
+        <pre>
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController(AppDb db) : ControllerBase
+{
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetUser(Guid id, CancellationToken ct)
+    {
+        var user = await db.Users
+.AsNoTracking()
+.SingleOrDefaultAsync(
+    u => u.Id == id,
+    ct // передаем CancellationToken в EntityFramework
+);
+
+        if (user is null) return NotFound();
+        return Ok(user);
+    }
+}
+
+        </pre>
+    </code>
+    <h3>Запуск нескольких задач</h3>
     <p>Как уже упоминалось ранее, асинхронный код позволяет не только не блокировать поток для операций ввода/вывода, но
         и ускорять работу нашего приложения.</p>
     <p>Предположим мы хотим считать наиболее часто встречающиеся слова сразу в нескольких произведениях. Но при этом
         делать это "одновременно", а точнее конкурентно.</p>
     <code>
         <pre>
-            Console.WriteLine("Укажите путь к произведению 1:");
-            var path1 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 1:");
+var path1 = Console.ReadLine();
 
-            Console.WriteLine("Укажите путь к произведению 2:");
-            var path2 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 2:");
+var path2 = Console.ReadLine();
 
-            Console.WriteLine("Укажите путь к произведению 3:");
-            var path3 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 3:");
+var path3 = Console.ReadLine();
 
-            // Запускаем 3 задачи сразу
-            Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
-            Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
-            Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
+// Запускаем 3 задачи сразу
+Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
+Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
+Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
 
-            // Ждём и печатаем по очереди (время общее ≈ 15 сек):
-            Console.WriteLine($"Чаще всего в произведении 1 встречается слово \"{await task1}\""); // ждём ~10с
-            Console.WriteLine($"Чаще всего в произведении 2 встречается слово \"{await task2}\""); // мгновенно, уже готово
-            Console.WriteLine($"Чаще всего в произведении 3 встречается слово \"{await task3}\""); // ждём еще ~5с
+// Ждём и печатаем по очереди (время общее ≈ 15 сек):
+Console.WriteLine($"Чаще всего в произведении 1 встречается слово \"{await task1}\""); // ждём ~10с
+Console.WriteLine($"Чаще всего в произведении 2 встречается слово \"{await task2}\""); // мгновенно, уже готово
+Console.WriteLine($"Чаще всего в произведении 3 встречается слово \"{await task3}\""); // ждём еще ~5с
 
-            return;
+return;
         </pre>
     </code>
     <p>Более высокая скорость в этом примере достигается за счет того что задачи task1, task2, task3 начинают
         выполняться сразу.</p>
     <p>Внимательный студент заметит, что кроме async/await в качестве возвращаемого значения метода
-        ReadAndCountWordAsync указаны типы Task и Task&lt;string&gt;. Этот объект и является основным компонентом моделирования асинхронных
+        ReadAndCountWordAsync указаны типы Task и Task&lt;string&gt;. Этот объект и является основным компонентом
+        моделирования асинхронных
         операций на языке C#.</p>
 
     <h2>Тип Task и Task&lt;T&gt;</h2>
@@ -200,27 +278,27 @@
     <p>Данный метод создает задачу, которая завершится после выполнения всех переданных задач.</p>
     <code>
         <pre>
-            Console.WriteLine("Укажите путь к произведению 1:");
-            var path1 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 1:");
+var path1 = Console.ReadLine();
 
-            Console.WriteLine("Укажите путь к произведению 2:");
-            var path2 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 2:");
+var path2 = Console.ReadLine();
 
-            Console.WriteLine("Укажите путь к произведению 3:");
-            var path3 = Console.ReadLine();
+Console.WriteLine("Укажите путь к произведению 3:");
+var path3 = Console.ReadLine();
 
-            Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
-            Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
-            Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
+Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
+Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
+Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
 
-            var all = await Task.WhenAll(task1, task2, task3); // завершится через ~15с
+var all = await Task.WhenAll(task1, task2, task3); // завершится через ~15с
 
-            Console.WriteLine("Все результаты готовы!");
-            Console.WriteLine("Чаще всего в произведении 1 встречается слово \"" + all[0] + "\"");
-            Console.WriteLine("Чаще всего в произведении 2 встречается слово \"" + all[1] + "\"");
-            Console.WriteLine("Чаще всего в произведении 3 встречается слово \"" + all[2] + "\"");
+Console.WriteLine("Все результаты готовы!");
+Console.WriteLine("Чаще всего в произведении 1 встречается слово \"" + all[0] + "\"");
+Console.WriteLine("Чаще всего в произведении 2 встречается слово \"" + all[1] + "\"");
+Console.WriteLine("Чаще всего в произведении 3 встречается слово \"" + all[2] + "\"");
 
-            return;
+return;
         </pre>
     </code>
 
@@ -229,100 +307,102 @@
 
     <code>
         <pre>
-            // Запускаем сразу три задачи
-            Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
-            Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
-            Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
+// Запускаем сразу три задачи
+Task<string> task1 = ReadAndCountWordAsync(path1); // 10 сек
+Task<string> task2 = ReadAndCountWordAsync(path2); // 5 сек
+Task<string> task3 = ReadAndCountWordAsync(path3); // 15 сек
 
-            // Ожидаем, пока завершится хотя бы одна задача
-            Task<string> firstFinished = await Task.WhenAny(task1, task2, task3);
+// Ожидаем, пока завершится хотя бы одна задача
+Task<string> firstFinished = await Task.WhenAny(task1, task2, task3);
 
-            // Получаем результат первой завершившейся
-            string result = await firstFinished;
+// Получаем результат первой завершившейся
+string result = await firstFinished;
 
-            Console.WriteLine("Первой завершилась задача с результатом:");
-            Console.WriteLine($"\"{result}\"");
+Console.WriteLine("Первой завершилась задача с результатом:");
+Console.WriteLine($"\"{result}\"");
         </pre>
     </code>
+
     <h2>Обработка ошибок в асинхронных методах</h2>
-    <p>Исключения в асинхронном коде в общем работают так же как и в синхронном, но вот что полезно знать при работе с исключениями в асинхронном программировании на C#.</p>
+    <p>Исключения в асинхронном коде в общем работают так же как и в синхронном, но вот что полезно знать при работе с
+        исключениями в асинхронном программировании на C#.</p>
     <ul class="unstyled">
         <li>
-            <p>Исключения не выбрасываются сразу, пока не будет вызван await</p>
-            <code>
+<p>Исключения не выбрасываются сразу, пока не будет вызван await</p>
+<code>
         <pre>
-            Task<string> task1 = ReadAndCountWordAsync(null); // не узнаем об ошибке, пока не подождем результат
+Task<string> task1 = ReadAndCountWordAsync(null); // не узнаем об ошибке, пока не подождем результат
 
 
-            try
-            {
-                await task1; // ждем результат
-            }
-            catch (ArgumentNullException)
-            {
-                Console.WriteLine("Не указан путь к файлу");
-                throw;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+try
+{
+    await task1; // ждем результат
+}
+catch (ArgumentNullException)
+{
+    Console.WriteLine("Не указан путь к файлу");
+    throw;
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+    throw;
+}
 
         </pre>
-            </code>
+</code>
         </li>
 
         <li>
-            <p>Проверки параметров рекомендуется производить до вызова асинхронного кода.</p>
-            <code>
-            <pre>
+<p>Проверки параметров рекомендуется производить до вызова асинхронного кода.</p>
+<code>
+<pre>
 
-            async Task<string> ReadAndCountWordAsync(string? path_to_file)
-            {
-                ArgumentNullException.ThrowIfNull(path_to_file); // валидируем входящие данные до вызова await
+async Task<string> ReadAndCountWordAsync(string? path_to_file)
+{
+    ArgumentNullException.ThrowIfNull(path_to_file); // валидируем входящие данные до вызова await
 
-                Console.WriteLine("Читаю файл с диска...");
+    Console.WriteLine("Читаю файл с диска...");
 
-                var content = await File.ReadAllTextAsync(path_to_file);
-                Console.WriteLine("Закончил читать файл");
-                Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
-                var word = GetMostCommonWord(content);
-                return word;
+    var content = await File.ReadAllTextAsync(path_to_file);
+    Console.WriteLine("Закончил читать файл");
+    Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+    var word = GetMostCommonWord(content);
+    return word;
 
-            }
+}
         </pre>
-            </code>
+</code>
         </li>
         <li>
-            <p>Оборачивать асинхронные операции в try/catch, так как в I/O часто что-то идет не так.</p>
-            <code>
-            <pre>
-            async Task<string> ReadAndCountWordAsync(string? path_to_file)
-            {
-                ArgumentNullException.ThrowIfNull(path_to_file);
+<p>Оборачивать асинхронные операции в try/catch, так как в I/O часто что-то идет не так.</p>
+<code>
+<pre>
+async Task<string> ReadAndCountWordAsync(string? path_to_file)
+{
+    ArgumentNullException.ThrowIfNull(path_to_file);
 
-                var content = new StringBuilder();
+    var content = new StringBuilder();
 
-                // Оборачиваем в try/catch вызов асинхронного метода
-                try
-                {
-                    Console.WriteLine("Читаю файл с диска...");
-                    var file_content = await File.ReadAllTextAsync(path_to_file);
-                    Console.WriteLine("Закончил читать файл");
-                    content.Append(file_content);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Какая-то ошибка при чтении файла с диска! " + e.Message);
-                    throw;
-                }
-                Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
-                var word = GetMostCommonWord(content.ToString());
-                return word;
-            }
-            </pre>
-            </code>
+    // Оборачиваем в try/catch вызов асинхронного метода
+    try
+    {
+        Console.WriteLine("Читаю файл с диска...");
+        var file_content = await File.ReadAllTextAsync(path_to_file);
+        Console.WriteLine("Закончил читать файл");
+        content.Append(file_content);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine("Какая-то ошибка при чтении файла с диска! " + e.Message);
+        throw;
+    }
+    Console.WriteLine("Узнаю, какое слово встречается чаще всего...");
+    var word = GetMostCommonWord(content.ToString());
+    return word;
+}
+</pre>
+</code>
         </li>
     </ul>
 </div>
